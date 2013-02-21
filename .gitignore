@@ -1,3 +1,7 @@
+*iws
+workspace.xml
+tasks.xml
+.idea/
 .idea/*
 *.py[cod]
 
