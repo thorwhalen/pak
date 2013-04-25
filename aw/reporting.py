@@ -113,6 +113,9 @@ def get_var_list_str(group='default'):
 
 
 def import_account_str_to_id(source='/D/Dropbox/dev/py/data/aw/account_name_accountid.csv',target='/D/Dropbox/dev/py/data/aw/account_name_accountid.p'):
+    """
+    This function imports a csv into a pickled dict that maps account names to account numbers (customer ids)
+    """
     df = pd.read_csv('/D/Dropbox/dev/py/data/aw/account_name_accountid.csv')
     df.index = df['Account']
     del df['Account']
@@ -120,6 +123,30 @@ def import_account_str_to_id(source='/D/Dropbox/dev/py/data/aw/account_name_acco
     pickle.dump( dfdict, open( target, "wb" ) )
 
 def get_account_num(account='test',account_str_to_id_dict='/D/Dropbox/dev/py/data/aw/account_name_accountid.p'):
+    """
+    Once the account_str_id map is imported using import_account_str_to_id(),
+    you can use the get_account_num() function to grab an account id from an account name
+In [70]: get_account_num('AU 01')
+Out[70]: 3851930085
+
+The test account id is also there
+In [80]: get_account_num('test')
+Out[80]: 7998744469
+
+In fact, it's the default
+In [82]: get_account_num()
+Out[82]: 7998744469
+
+If you input an empty string as the account name, the function will print a list of available account names
+In [83]: get_account_num('')
+AVAILABLE ACCOUNT NAMES:
+['FI 01-INDIE', 'ZH 01', 'IT 01-CONT', 'UK 01-INDIE', etc.]
+
+You'll get this list also if you enter an account name that is not available
+In [86]: get_account_num('matt is a monkey')
+THIS ACCOUNT NAME IS NOT AVAILABLE! AVAILABLE ACCOUNTS:
+['FI 01-INDIE', 'ZH 01', 'IT 01-CONT', 'UK 01-INDIE', etc.]
+    """
     if not isinstance(account_str_to_id_dict,dict):
         if isinstance(account_str_to_id_dict,str):
             account_str_to_id_dict = pickle.load(open(account_str_to_id_dict,"rb"))
