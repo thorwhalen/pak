@@ -2,9 +2,31 @@ __author__ = 'thorwhalen'
 # This file contains function to deal with AdWords reporting
 
 import datetime
+import pandas as pd
+import pickle
 
-def get_report_downloader(client):
+def get_client(clientCustomerId='7998744469'):
+    # test :  7998744469
+    # other : 5127918221
+    # US 03 : 7214411738
+    # AU 01 : 3851930085
+    import os
     from adspygoogle import AdWordsClient
+    headers = {'email': 'myvenereuser@gmail.com',
+               'password': os.environ['VEN_ADWORDS_EMAIL_PASSWORD'],
+               'clientCustomerId': clientCustomerId,
+               'userAgent': 'MethodicSolutions',
+               'developerToken': os.environ['VEN_ADWORDS_TOKEN'],
+               'validateOnly': 'n',
+               'partialFailure': 'n'
+    }
+    return AdWordsClient(headers=headers)
+
+def get_report_downloader(clientCustomerId='7998744469',client=''):
+    from adspygoogle import AdWordsClient
+    if client=='':
+        client = get_client(clientCustomerId=clientCustomerId)
+    print "Getting client for clientCustomerId={}".format(clientCustomerId)
     return client.GetReportDownloader(version='v201302')
 
 def download_report(report_downloader,report_query_str,download_format='df'):
@@ -90,6 +112,34 @@ def get_var_list_str(group='default'):
         }.get(group, (''))    # empty is the group is not found
 
 
+def import_account_str_to_id(source='/D/Dropbox/dev/py/data/aw/account_name_accountid.csv',target='/D/Dropbox/dev/py/data/aw/account_name_accountid.p'):
+    df = pd.read_csv('/D/Dropbox/dev/py/data/aw/account_name_accountid.csv')
+    df.index = df['Account']
+    del df['Account']
+    dfdict = df.to_dict()
+    pickle.dump( dfdict, open( target, "wb" ) )
+
+def get_account_num(account='test',account_str_to_id_dict='/D/Dropbox/dev/py/data/aw/account_name_accountid.p'):
+    if not isinstance(account_str_to_id_dict,dict):
+        if isinstance(account_str_to_id_dict,str):
+            account_str_to_id_dict = pickle.load(open(account_str_to_id_dict,"rb"))
+        else:
+            print "Unknown account_str_to_id_dict type"
+    if not account:
+        print "AVAILABLE ACCOUNT NAMES:"
+        print account_str_to_id_dict['Customer ID'].keys()
+    elif not account_str_to_id_dict['Customer ID'].has_key(account):
+        print "THIS ACCOUNT NAME IS NOT AVAILABLE! AVAILABLE ACCOUNTS:"
+        print account_str_to_id_dict['Customer ID'].keys()
+    else:
+        return account_str_to_id_dict['Customer ID'][account]
+
+
+########################################################################################################################
+# print if ran
+print "you just ran pak/aw/reporting.py"
+
 ########################################################################################################################
 # testing
-print mk_report_query_str(varList='q_km_picc',start_date=21)
+
+# print mk_report_query_str(varList='q_km_picc',start_date=21)
